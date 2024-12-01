@@ -31,6 +31,15 @@ func main() {
 		totalDistance += distance
 	}
 	fmt.Printf("Total distance: %d\n", totalDistance)
+
+	// Part Two
+	totalSimilarityScore := 0
+	for _, leftInt := range sortedLeft {
+		appearances := getAppearances(leftInt, sortedRight)
+		totalSimilarityScore += leftInt * appearances
+	}
+	fmt.Printf("Total similarity score: %d\n", totalSimilarityScore)
+
 }
 
 func populateLeftAndRight() ([]int, []int, error) {
@@ -64,7 +73,6 @@ func populateLeftAndRight() ([]int, []int, error) {
 }
 
 func getDistance(a int, b int) (int, error) {
-	fmt.Println(a, b)
 	if b > a {
 		return b - a, nil
 	} else if a > b {
@@ -92,4 +100,14 @@ func sort(a []int) []int {
 		}
 	}
 	return b
+}
+
+func getAppearances(aInt int, bInts []int) int {
+	appearances := 0
+	for _, bInt := range bInts {
+		if bInt == aInt {
+			appearances = appearances + 1
+		}
+	}
+	return appearances
 }
