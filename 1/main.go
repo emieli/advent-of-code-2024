@@ -11,9 +11,33 @@ import (
 
 func main() {
 
-	input, err := os.ReadFile("input")
+	left, right, err := populateLeftAndRight()
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	sortedLeft := sort(left)
+	sortedRight := sort(right)
+
+	// Part One
+	distances := make([]int, 1000)
+	var totalDistance int
+	for i, _ := range sortedLeft {
+		distance, err := getDistance(sortedLeft[i], sortedRight[i])
+		if err != nil {
+			log.Fatal(err)
+		}
+		distances[i] = distance
+		totalDistance += distance
+	}
+	fmt.Printf("Total distance: %d\n", totalDistance)
+}
+
+func populateLeftAndRight() ([]int, []int, error) {
+
+	input, err := os.ReadFile("input")
+	if err != nil {
+		return nil, nil, err
 	}
 
 	left := make([]int, 1000)
@@ -28,31 +52,15 @@ func main() {
 
 		left[i], err = strconv.Atoi(line_split[0])
 		if err != nil {
-			log.Fatal(err)
+			return nil, nil, err
 		}
 		right[i], err = strconv.Atoi(line_split[1])
 		if err != nil {
-			log.Fatal(err)
+			return nil, nil, err
 		}
 	}
 
-	sortedLeft := sort(left)
-	sortedRight := sort(right)
-
-	distances := make([]int, 1000)
-	var total_distance int
-	for i, _ := range sortedLeft {
-		distance, err := getDistance(sortedLeft[i], sortedRight[i])
-		fmt.Println(distance)
-		if err != nil {
-			log.Fatal(err)
-		}
-		distances[i] = distance
-		total_distance = total_distance + distance
-	}
-
-	fmt.Printf("Total distance: %d", total_distance)
-
+	return left, right, nil
 }
 
 func getDistance(a int, b int) (int, error) {
