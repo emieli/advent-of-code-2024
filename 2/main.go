@@ -36,14 +36,19 @@ func main() {
 	}
 
 	var safeReportsCounter int
+	var safeReportsWithDampenerCounter int
 	for _, report := range reports {
-		safe := checkIfSafe(report)
-		if safe {
+		counter := checkIfSafeWithDampener(report)
+		if counter == 0 {
 			safeReportsCounter += 1
+			safeReportsWithDampenerCounter += 1
 		}
-		fmt.Println(safe, report)
+		if counter == 1 {
+			safeReportsWithDampenerCounter += 1
+		}
 	}
-	fmt.Printf("Safe reports: %d", safeReportsCounter)
+	fmt.Printf("Safe reports: %d\n", safeReportsCounter)
+	fmt.Printf("Safe dampened reports: %d\n", safeReportsWithDampenerCounter)
 
 }
 
@@ -52,7 +57,10 @@ func main() {
 // - The levels are either all increasing or all decreasing.
 //
 // - Any two adjacent levels differ by at least one and at most three.
-func checkIfSafe(report []int) bool {
+//
+// We tolerate a single bad level in what would otherwise be a safe report.
+func checkIfSafeWithDampener(report []int) int {
+	var badLevelCounter int
 	var lastDigit int
 	var increasing bool
 	var decreasing bool
@@ -61,23 +69,16 @@ func checkIfSafe(report []int) bool {
 		if i == 0 {
 			continue
 		}
-
 		lastDigit = report[i-1]
 
 		if currDigit == lastDigit {
-			fmt.Printf("Duplicate %d %d | ", currDigit, lastDigit)
-			return false
+			badLevelCounter += 1
 		}
-
 		if decreasing && currDigit > lastDigit {
-			// Unsafe if decreasing numbers suddenly increase
-			fmt.Printf("Decreasing but %d > %d | ", currDigit, lastDigit)
-			return false
+			badLevelCounter += 1
 		}
 		if increasing && currDigit < lastDigit {
-			// Unsafe if increasing numbers suddenly decrease
-			fmt.Printf("Increasing but %d < %d | ", currDigit, lastDigit)
-			return false
+			badLevelCounter += 1
 		}
 
 		var diff int
@@ -86,10 +87,8 @@ func checkIfSafe(report []int) bool {
 		} else {
 			diff = lastDigit - currDigit
 		}
-
 		if diff > 3 {
-			fmt.Printf("diff: %d | ", diff)
-			return false
+			badLevelCounter += 1
 		}
 
 		if !decreasing && !increasing && currDigit > lastDigit {
@@ -99,5 +98,5 @@ func checkIfSafe(report []int) bool {
 			decreasing = true
 		}
 	}
-	return true
+	return badLevelCounter
 }
