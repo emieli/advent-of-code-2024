@@ -17,15 +17,37 @@ func main() {
 
 	var multiplications int
 	sections := strings.Split(string(input), "mul(")
-	for _, section := range sections {
+
+	var doIndex int
+	var dontIndex int
+	for sectionIndex, section := range sections {
+
+		if strings.Contains(section, "do()") {
+			// fmt.Printf("do()    found in %d\n", sectionIndex)
+			doIndex = sectionIndex
+		}
+
+		if strings.Contains(section, "don't()") {
+			// fmt.Printf("don't() found in %d\n", sectionIndex)
+			dontIndex = sectionIndex
+		}
+
 		output, err := getValidSection(section)
 		if err != nil {
 			continue
 		}
+
+		if dontIndex > doIndex {
+			// The latest instruction was a don't(), do don't multiply
+			// fmt.Printf("Skipped multiply as %d > %d\n", dontIndex, doIndex)
+			continue
+		}
+
 		multiplication, err := multiply(output)
 		if err != nil {
 			continue
 		}
+		// fmt.Println("Performed multiplication")
 		multiplications += multiplication
 	}
 	fmt.Println(multiplications)
