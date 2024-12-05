@@ -22,14 +22,27 @@ func main() {
 	var dontIndex int
 	for sectionIndex, section := range sections {
 
-		if strings.Contains(section, "do()") {
-			// fmt.Printf("do()    found in %d\n", sectionIndex)
-			doIndex = sectionIndex
+		var lastSection string
+		var lastSectionIndex int
+		if sectionIndex > 0 {
+			lastSectionIndex = sectionIndex - 1
+			lastSection = sections[lastSectionIndex]
 		}
 
-		if strings.Contains(section, "don't()") {
-			// fmt.Printf("don't() found in %d\n", sectionIndex)
-			dontIndex = sectionIndex
+		if strings.Contains(lastSection, "do()") {
+			fmt.Printf("%.3d do()\n", lastSectionIndex)
+			doIndex = lastSectionIndex
+		}
+
+		if strings.Contains(lastSection, "don't()") {
+			fmt.Printf("%.3d don't()\n", lastSectionIndex)
+			dontIndex = lastSectionIndex
+		}
+
+		if dontIndex > doIndex {
+			// The latest instruction was a don't(), do don't multiply
+			fmt.Printf("%.3d multiply skipped\n", lastSectionIndex)
+			continue
 		}
 
 		output, err := getValidSection(section)
@@ -37,17 +50,11 @@ func main() {
 			continue
 		}
 
-		if dontIndex > doIndex {
-			// The latest instruction was a don't(), do don't multiply
-			// fmt.Printf("Skipped multiply as %d > %d\n", dontIndex, doIndex)
-			continue
-		}
-
 		multiplication, err := multiply(output)
 		if err != nil {
 			continue
 		}
-		// fmt.Println("Performed multiplication")
+		fmt.Printf("%.3d multiply %s\n", sectionIndex, output)
 		multiplications += multiplication
 	}
 	fmt.Println(multiplications)
