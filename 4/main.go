@@ -24,6 +24,10 @@ func main() {
 	count += getDiagonalRightToLeftCount(string(input))
 	fmt.Println(count)
 
+	// Part 2
+	count = getXmasCount(string(input))
+	fmt.Println(count)
+
 }
 
 func getHorizontalForwardCount(input string) int {
@@ -113,4 +117,39 @@ func getDiagonalRightToLeftCount(input string) int {
 		}
 	}
 	return wordCounter
+}
+
+// Find SAM/MAS in X-formation. Here are 8 SAM/MAS:es:
+//
+//	S.S.S.S.S.
+//	.A.A.A.A..
+//	M.M.M.M.M.
+//	.A.A.A.A..
+//	S.S.S.S.S.
+func getXmasCount(input string) int {
+
+	lines := strings.Split(input, "\r\n")
+	lineLength := len(lines[0])
+
+	var wordCounter int
+
+	for lineIndex := 0; lineIndex < len(lines)-3; lineIndex++ {
+		for charIndex := 0; charIndex < lineLength-2; charIndex++ {
+			var wordOne string
+			wordOne += string(lines[lineIndex][charIndex])
+			wordOne += string(lines[lineIndex+1][charIndex+1])
+			wordOne += string(lines[lineIndex+2][charIndex+2])
+			var wordTwo string
+			wordTwo += string(lines[lineIndex][charIndex+2])
+			wordTwo += string(lines[lineIndex+1][charIndex+1])
+			wordTwo += string(lines[lineIndex+2][charIndex])
+
+			if (wordOne == "SAM" || wordOne == "MAS") && (wordTwo == "SAM" || wordTwo == "MAS") {
+				wordCounter += 1
+			}
+
+		}
+	}
+	return wordCounter
+
 }
