@@ -25,18 +25,45 @@ func main() {
 
 	// Part 1
 	var middleNumberCounter int
+	var reorderedMiddleNumberCounter int
 	for _, pages := range pageUpdates {
 		valid := validatePagesInUpdate(pages, orderingRules)
 		if !valid {
+			reorderedPages := reorderPageUpdate(pages, orderingRules)
+			reorderedMiddleNumberCounter += getMiddleNumber(reorderedPages)
 			continue
 		}
 		middleNumberCounter += getMiddleNumber(pages)
 	}
 	fmt.Println(middleNumberCounter)
+	fmt.Println(reorderedMiddleNumberCounter)
 }
 
 func getMiddleNumber(numbers []int) int {
 	return numbers[len(numbers)/2]
+}
+
+// Create a new slice with pages in the same order, but only if
+// our page doesn't have any preceeding pages in its
+// pagesThatMustComeAfterThisPage rules
+func reorderPageUpdate(pages []int, rules map[int][]int) []int {
+
+	newPages := make([]int, 0, len(pages))
+	for _, page := range pages {
+		pagesThatMustComeAfterThisPage := rules[page]
+		var inserted bool
+		for nPageIndex, nPage := range newPages {
+			if slices.Contains(pagesThatMustComeAfterThisPage, nPage) {
+				newPages = slices.Insert(newPages, nPageIndex, page)
+				inserted = true
+				break
+			}
+		}
+		if !inserted {
+			newPages = append(newPages, page)
+		}
+	}
+	return newPages
 }
 
 // Go through the pages in reverse. For each page, check the pages before it.
