@@ -34,9 +34,9 @@ func main() {
 
 	var total int
 	for _, e := range equations {
-		combinations := generateOperatorCombinations(e)
-		for _, combination := range combinations {
-			if validEquationOperator(e.Numbers, e.Result, combination) {
+		operatorCombinations := generateOperatorCombinations(e.Numbers)
+		for _, operator := range operatorCombinations {
+			if validEquationOperator(e.Numbers, e.Result, operator) {
 				total += e.Result
 				break
 			}
@@ -46,23 +46,26 @@ func main() {
 }
 
 // A three-number equation require two operators. In that case, we have a total of
-// four possible operator combinations: ++, +*, *+, **.
-// We use binary to generate all operator combinations, replacing 0 with + and 1 with *.
-func generateOperatorCombinations(e Equation) []string {
+// nine possible operator combinations: ++, +*, +|, *+, **, *|, ||, |+, |*.
+// We use ternary (base 3) to generate all operator combinations,
+// We replace 0 with +, 1 with * and 2 with |.
+func generateOperatorCombinations(numbers []int) []string {
 
-	totalOperators := len(e.Numbers) - 1
-	possibleCombinations := int(math.Pow(2, float64(totalOperators)))
+	totalOperators := len(numbers) - 1
+	possibleCombinations := int(math.Pow(3, float64(totalOperators)))
 	operatorCombinations := make([]string, 0, possibleCombinations)
 
 	for c := 0; c < possibleCombinations; c++ {
 
-		cToBinaryToString := string(strconv.FormatInt(int64(c), 2))
+		cToTernaryAsString := string(strconv.FormatInt(int64(c), 3))
 		// Pad string to make it into a "binary" format
-		for len(cToBinaryToString) < totalOperators {
-			cToBinaryToString = "0" + cToBinaryToString
+		for len(cToTernaryAsString) < totalOperators {
+			cToTernaryAsString = "0" + cToTernaryAsString
 		}
-		operators := strings.ReplaceAll(cToBinaryToString, "1", "*")
+		var operators string
+		operators = strings.ReplaceAll(cToTernaryAsString, "1", "*")
 		operators = strings.ReplaceAll(operators, "0", "+")
+		operators = strings.ReplaceAll(operators, "2", "|")
 		operatorCombinations = append(operatorCombinations, operators)
 	}
 	return operatorCombinations
@@ -70,20 +73,26 @@ func generateOperatorCombinations(e Equation) []string {
 
 func validEquationOperator(numbers []int, expectedResult int, operators string) bool {
 
-	var total int
+	total := numbers[0]
 	for i := 0; i < len(numbers)-1; i++ {
 
-		if i == 0 {
-			total = numbers[i]
-		}
 		operator := string(operators[i])
 		if operator == "+" {
-			// fmt.Printf("%d + %d\n", total, numbers[i+1])
+			// fmt.Printf("%d + %d", total, numbers[i+1])
 			total += numbers[i+1]
 		} else if operator == "*" {
-			// fmt.Printf("%d x %d\n", total, numbers[i+1])
+			// fmt.Printf("%d x %d", total, numbers[i+1])
 			total *= numbers[i+1]
+		} else if operator == "|" {
+			// fmt.Printf("%d | %d", total, numbers[i+1])
+			concatenation := strconv.Itoa(total) + strconv.Itoa(numbers[i+1])
+			concatAsInt, err := strconv.Atoi(concatenation)
+			if err != nil {
+				log.Fatal(err)
+			}
+			total = concatAsInt
 		}
+		// fmt.Printf(" = %d\n", total)
 	}
 	return total == expectedResult
 }
